@@ -1,12 +1,12 @@
 package org.princeh.concreteImplementations;
 
-import org.princeh.interfaces.ContactObserver;
+import org.princeh.interfaces.Observer;
 import org.princeh.models.BaseContact;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReminderSystem implements ContactObserver {
+public class ReminderSystem implements Observer {
     private static final long THIRTY_DAYS_MS = 30L * 24 * 60 * 60 * 1000;
 
     @Override

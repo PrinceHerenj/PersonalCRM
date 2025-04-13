@@ -1,6 +1,6 @@
 package org.princeh;
 
-import org.princeh.controller.EnhancedContactManager;
+import org.princeh.controller.EnhancedManager;
 import org.princeh.models.BaseContact;
 import org.princeh.models.BusinessContact;
 import org.princeh.models.PersonalContact;
@@ -279,7 +279,7 @@ public class CRMGUI extends JFrame {
             for (BaseContact contact : contacts) {
                 if (contact.getFirstName().equals(firstName) && contact.getLastName().equals(lastName)) {
 
-                    boolean removed = ((EnhancedContactManager)crmSystem.getContactManager()).removeContact(contact);
+                    boolean removed = ((EnhancedManager)crmSystem.getContactManager()).removeContact(contact);
 
                     if (removed) {
                         refreshTableData();

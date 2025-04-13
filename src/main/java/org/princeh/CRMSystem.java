@@ -1,15 +1,15 @@
 package org.princeh;
 
 import org.princeh.concreteImplementations.ReminderSystem;
-import org.princeh.controller.EnhancedContactManager;
+import org.princeh.controller.EnhancedManager;
 
 public class CRMSystem {
     public static CRMSystem instance;
-    private EnhancedContactManager contactManager;
+    private EnhancedManager contactManager;
     private ReminderSystem reminderSystem;
 
     private CRMSystem() {
-        contactManager = new EnhancedContactManager();
+        contactManager = new EnhancedManager();
         reminderSystem = new ReminderSystem();
         contactManager.registerObserver(reminderSystem);
     }
@@ -21,7 +21,7 @@ public class CRMSystem {
         return instance;
     }
 
-    public EnhancedContactManager getContactManager() {
+    public EnhancedManager getContactManager() {
         return contactManager;
     }
 

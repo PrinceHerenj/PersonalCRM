@@ -1,38 +1,38 @@
 package org.princeh.controller;
 
-import org.princeh.interfaces.ContactObserver;
+import org.princeh.interfaces.Observer;
 import org.princeh.interfaces.ContactSearchable;
-import org.princeh.interfaces.ContactSubject;
+import org.princeh.interfaces.Subject;
 import org.princeh.models.BaseContact;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class EnhancedContactManager implements ContactSearchable, ContactSubject {
+public class EnhancedManager implements ContactSearchable, Subject {
     private List<BaseContact> contacts;
-    private List<ContactObserver> observers;
+    private List<Observer> observers;
 
-    public EnhancedContactManager() {
+    public EnhancedManager() {
         contacts = new ArrayList<>();
         observers = new ArrayList<>();
     }
 
     @Override
-    public void registerObserver(ContactObserver observer) {
+    public void registerObserver(Observer observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
         }
     }
 
     @Override
-    public void removeObserver(ContactObserver observer) {
+    public void removeObserver(Observer observer) {
         observers.remove(observer);
     }
 
     @Override
     public void notifyObservers(BaseContact contact, String updateType) {
-        for (ContactObserver observer : observers) {
+        for (Observer observer : observers) {
             observer.onContactUpdate(contact, updateType);
         }
     }
