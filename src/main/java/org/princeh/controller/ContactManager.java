@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class EnhancedManager implements ContactSearchable, Subject {
+public class ContactManager implements ContactSearchable, Subject {
     private List<BaseContact> contacts;
     private List<Observer> observers;
 
-    public EnhancedManager() {
+    public ContactManager() {
         contacts = new ArrayList<>();
         observers = new ArrayList<>();
     }

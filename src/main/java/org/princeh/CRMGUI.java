@@ -1,6 +1,6 @@
 package org.princeh;
 
-import org.princeh.controller.EnhancedManager;
+import org.princeh.controller.ContactManager;
 import org.princeh.models.BaseContact;
 import org.princeh.models.BusinessContact;
 import org.princeh.models.PersonalContact;
@@ -34,6 +34,11 @@ public class CRMGUI extends JFrame {
         searchField = new JTextField(20);
         searchButton = new JButton("Search");
         contactTypeCombo = new JComboBox<>(new String[] {"All", "Personal", "Business"});
+
+        topPanel.add(new JLabel("Search:"));
+        topPanel.add(searchField);
+        topPanel.add(contactTypeCombo);
+        topPanel.add(searchButton);
 
         String[] columnNames = {"Type", "Firstname", "Lastname", "Email", "Contact Method", "Last Contacted"};
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -125,6 +130,8 @@ public class CRMGUI extends JFrame {
         } else {
             results = crmSystem.getContactManager().searchByName(searchTerm);
         }
+
+        // TODO: performing search based on email, name, or before given date
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         for (BaseContact contact : results) {
@@ -279,7 +286,7 @@ public class CRMGUI extends JFrame {
             for (BaseContact contact : contacts) {
                 if (contact.getFirstName().equals(firstName) && contact.getLastName().equals(lastName)) {
 
-                    boolean removed = ((EnhancedManager)crmSystem.getContactManager()).removeContact(contact);
+                    boolean removed = ((ContactManager)crmSystem.getContactManager()).removeContact(contact);
 
                     if (removed) {
                         refreshTableData();
