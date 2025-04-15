@@ -17,7 +17,7 @@ public class CRMGUI extends JFrame {
     private final DefaultTableModel tableModel;
     private final JTextField searchField;
     private final JButton addButton, searchButton, updateButton, deleteButton;
-    private final JComboBox<String> contactTypeCombo;
+    private final JComboBox<String> contactTypeCombo, searchTypeCombo;
 
     private static final String MONGODB_CONNECTION_STRING =
             "mongodb+srv://princeherenj:Sh353478@cluster0.7xs6q3p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
