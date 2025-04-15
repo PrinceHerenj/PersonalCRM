@@ -1,4 +1,4 @@
-package org.princeh.concreteImplementations;
+package org.princeh.impl;
 
 import org.princeh.interfaces.Observer;
 import org.princeh.models.BaseContact;

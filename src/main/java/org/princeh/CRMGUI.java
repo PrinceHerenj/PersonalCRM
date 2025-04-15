@@ -1,9 +1,8 @@
 package org.princeh;
 
-import org.princeh.controller.ContactManager;
 import org.princeh.models.BaseContact;
-import org.princeh.models.BusinessContact;
-import org.princeh.models.PersonalContact;
+import org.princeh.models.MongoBusinessContact;
+import org.princeh.models.MongoPersonalContact;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,17 +13,26 @@ import java.util.List;
 
 public class CRMGUI extends JFrame {
     private CRMSystem crmSystem;
-    private JTable contactTable;
-    private DefaultTableModel tableModel;
-    private JTextField searchField;
-    private JButton addButton, searchButton, updateButton, deleteButton;
-    private JComboBox<String> contactTypeCombo;
+    private final JTable contactTable;
+    private final DefaultTableModel tableModel;
+    private final JTextField searchField;
+    private final JButton addButton, searchButton, updateButton, deleteButton;
+    private final JComboBox<String> contactTypeCombo;
+
+    private static final String MONGODB_CONNECTION_STRING =
+            "mongodb+srv://princeherenj:Sh353478@cluster0.7xs6q3p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
     public CRMGUI() {
-        crmSystem = CRMSystem.getInstance();
+        try {
+            crmSystem = CRMSystem.getInstance(MONGODB_CONNECTION_STRING);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Failed to connect to MongoDB: " + e.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
 
         setTitle("Personal CRM System");
-        setSize(800, 600);
+        setSize(1200, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -73,15 +81,15 @@ public class CRMGUI extends JFrame {
     }
 
     private void setupEventHandlers() {
-        searchButton.addActionListener(e -> {
+        searchButton.addActionListener(_ -> {
             String searchTerm = searchField.getText().trim();
             String contactType = (String) contactTypeCombo.getSelectedItem();
             performSearch(searchTerm, contactType);
         });
 
-        addButton.addActionListener(e -> showAddContactDialog());
+        addButton.addActionListener(_ -> showAddContactDialog());
 
-        updateButton.addActionListener(e -> {
+        updateButton.addActionListener(_ -> {
             int selectedRow = contactTable.getSelectedRow();
             if (selectedRow >= 0) {
                 updateSelectedContact(selectedRow);
@@ -91,7 +99,7 @@ public class CRMGUI extends JFrame {
             }
         });
 
-        deleteButton.addActionListener(e -> {
+        deleteButton.addActionListener(_ -> {
             int selectedRow = contactTable.getSelectedRow();
             if (selectedRow >= 0) {
                 deleteSelectedContact(selectedRow);
@@ -197,7 +205,7 @@ public class CRMGUI extends JFrame {
         cardPanel.add(personalPanel, "Personal");
         cardPanel.add(businessPanel, "Business");
 
-        typeCombo.addActionListener(e -> {
+        typeCombo.addActionListener(_ -> {
             CardLayout cl = (CardLayout) cardPanel.getLayout();
             cl.show(cardPanel, (String) typeCombo.getSelectedItem());
         });
@@ -208,11 +216,11 @@ public class CRMGUI extends JFrame {
         buttomPanel.add(saveButton);
         buttomPanel.add(cancelButton);
 
-        saveButton.addActionListener(e -> {
+        saveButton.addActionListener(_ -> {
             String type = (String) typeCombo.getSelectedItem();
-            String firstName = (String) firstNameField.getText();
-            String lastName = (String) lastNameField.getText();
-            String email = (String) emailField.getText();
+            String firstName = firstNameField.getText();
+            String lastName = lastNameField.getText();
+            String email = emailField.getText();
 
             if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog,
@@ -222,17 +230,17 @@ public class CRMGUI extends JFrame {
                 return;
             }
 
-//            assert type != null;
+            assert type != null;
             if (type.equals("Personal")) {
-                String phone = (String) phoneField.getText().trim();
-                String address = (String) addressField.getText().trim();
-                PersonalContact contact = new PersonalContact(firstName, lastName, email, phone, address);
+                String phone = phoneField.getText().trim();
+                String address = addressField.getText().trim();
+                MongoPersonalContact contact = new MongoPersonalContact(firstName, lastName, email, phone, address);
                 crmSystem.getContactManager().addContact(contact);
             } else {
-                String company = (String) companyField.getText().trim();
-                String jobTitle = (String) jobTitleField.getText().trim();
-                String workPhone = (String) workPhoneField.getText().trim();
-                BusinessContact contact = new BusinessContact(firstName, lastName, email, company, jobTitle, workPhone);
+                String company = companyField.getText().trim();
+                String jobTitle = jobTitleField.getText().trim();
+                String workPhone = workPhoneField.getText().trim();
+                MongoBusinessContact contact = new MongoBusinessContact(firstName, lastName, email, company, jobTitle, workPhone);
                 crmSystem.getContactManager().addContact(contact);
             }
 
@@ -240,7 +248,7 @@ public class CRMGUI extends JFrame {
             dialog.dispose();
         });
 
-        cancelButton.addActionListener(e -> dialog.dispose());
+        cancelButton.addActionListener(_ -> dialog.dispose());
 
         dialog.add(formPanel, BorderLayout.NORTH);
         dialog.add(cardPanel, BorderLayout.CENTER);
@@ -286,7 +294,7 @@ public class CRMGUI extends JFrame {
             for (BaseContact contact : contacts) {
                 if (contact.getFirstName().equals(firstName) && contact.getLastName().equals(lastName)) {
 
-                    boolean removed = ((ContactManager)crmSystem.getContactManager()).removeContact(contact);
+                    boolean removed = crmSystem.getContactManager().removeContact(contact);
 
                     if (removed) {
                         refreshTableData();
@@ -310,6 +318,6 @@ public class CRMGUI extends JFrame {
             throw new RuntimeException(e);
         }
 
-        SwingUtilities.invokeLater(() -> new CRMGUI());
+        SwingUtilities.invokeLater(CRMGUI::new);
     }
 }

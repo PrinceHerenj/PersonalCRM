@@ -4,7 +4,7 @@ public abstract class BaseContact implements Comparable<BaseContact> {
     private String firstName;
     private String lastName;
     private String email;
-    private long lastContactedDate;
+    protected long lastContactedDate;
 
     public BaseContact(String firstName, String lastName, String email) {
         this.firstName = firstName;

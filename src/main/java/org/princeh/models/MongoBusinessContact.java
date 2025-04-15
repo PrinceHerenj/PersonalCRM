@@ -1,11 +1,11 @@
 package org.princeh.models;
 
-public class BusinessContact extends BaseContact {
+public class MongoBusinessContact extends MongoBaseContact {
     private String companyName;
     private String jobTitle;
     private String workPhone;
 
-    public BusinessContact(String firstName, String lastName, String email, String companyName, String jobTitle, String workPhone) {
+    public MongoBusinessContact(String firstName, String lastName, String email, String companyName, String jobTitle, String workPhone) {
         super(firstName, lastName, email);
         this.companyName = companyName;
         this.jobTitle = jobTitle;
@@ -23,7 +23,7 @@ public class BusinessContact extends BaseContact {
 
     @Override
     public String getContactMethod() {
-        return "Work: " + workPhone;
+        return "Work" + workPhone;
     }
 
     @Override
