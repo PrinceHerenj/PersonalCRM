@@ -7,6 +7,8 @@ import org.princeh.models.MongoPersonalContact;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -15,9 +17,10 @@ public class CRMGUI extends JFrame {
     private CRMSystem crmSystem;
     private final JTable contactTable;
     private final DefaultTableModel tableModel;
-    private final JTextField searchField;
+    private final JTextField searchField, startDateField, endDateField;
     private final JButton addButton, searchButton, updateButton, deleteButton;
-    private final JComboBox<String> contactTypeCombo;
+    private final JComboBox<String> contactTypeCombo, searchTypeCombo;
+    private final JLabel startDateLabel =  new JLabel("Start Date:"), endDateLabel = new JLabel("End Date:");
 
     private static final String MONGODB_CONNECTION_STRING =
             "mongodb+srv://princeherenj:Sh353478@cluster0.7xs6q3p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -32,7 +35,7 @@ public class CRMGUI extends JFrame {
         }
 
         setTitle("Personal CRM System");
-        setSize(1200, 600);
+        setSize(1300, 731);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -43,10 +46,39 @@ public class CRMGUI extends JFrame {
         searchButton = new JButton("Search");
         contactTypeCombo = new JComboBox<>(new String[] {"All", "Personal", "Business"});
 
+        searchTypeCombo = new JComboBox<>(new String[] {"Name/Email", "Date-Range"});
+        startDateField = new JTextField(20);
+        endDateField = new JTextField(20);
+
+        startDateField.setVisible(false);
+        endDateField.setVisible(false);
+        startDateLabel.setVisible(false);
+        endDateLabel.setVisible(false);
+
+        searchTypeCombo.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    boolean isDateRange = "Date-Range".equals(e.getItem());
+                    startDateLabel.setVisible(isDateRange);
+                    startDateField.setVisible(isDateRange);
+                    endDateLabel.setVisible(isDateRange);
+                    endDateField.setVisible(isDateRange);
+                    topPanel.revalidate();
+                    topPanel.repaint();
+                }
+            }
+        });
+
         topPanel.add(new JLabel("Search:"));
         topPanel.add(searchField);
         topPanel.add(contactTypeCombo);
+        topPanel.add(searchTypeCombo);
         topPanel.add(searchButton);
+        topPanel.add(startDateLabel);
+        topPanel.add(startDateField);
+        topPanel.add(endDateLabel);
+        topPanel.add(endDateField);
 
         String[] columnNames = {"Type", "Firstname", "Lastname", "Email", "Contact Method", "Last Contacted"};
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -84,7 +116,14 @@ public class CRMGUI extends JFrame {
         searchButton.addActionListener(_ -> {
             String searchTerm = searchField.getText().trim();
             String contactType = (String) contactTypeCombo.getSelectedItem();
-            performSearch(searchTerm, contactType);
+            String contactMethod = (String) searchTypeCombo.getSelectedItem();
+            if (contactMethod != null && contactMethod.equals("Name/Email"))
+                performSearch(searchTerm, contactType);
+            else {
+                long startDate = Long.parseLong(startDateField.getText().trim());
+                long endDate = Long.parseLong(endDateField.getText().trim());
+                performSearch(searchTerm, contactType, startDate, endDate);
+            }
         });
 
         addButton.addActionListener(_ -> showAddContactDialog());
@@ -128,20 +167,21 @@ public class CRMGUI extends JFrame {
             });
         }
     }
-
-    private void performSearch(String searchTerm, String contactType) {
+    private void performSearch(String searchTerm, String contactType, long startDate, long endDate) {
         tableModel.setRowCount(0);
 
-        BaseContact[] results;
-        if (searchTerm.isEmpty()) {
-            results = crmSystem.getContactManager().getAllContacts().toArray(new BaseContact[0]);
-        } else {
-            results = crmSystem.getContactManager().searchByName(searchTerm);
+        BaseContact[] results = null;
+        if (searchTerm.isEmpty()) results = crmSystem.getContactManager().getAllContacts().toArray(new BaseContact[0]);
+        else  {
+            results = crmSystem.getContactManager().searchByDateRange(startDate, endDate);
         }
 
-        // TODO: performing search based on email, name, or before given date
+        fillContacts(contactType, results);
+    }
 
+    private void fillContacts(String contactType, BaseContact[] results) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        assert results != null;
         for (BaseContact contact : results) {
             if (contactType.equals("All") || contact.getContactType().equals(contactType)) {
                 tableModel.addRow(new Object[]{
@@ -154,6 +194,22 @@ public class CRMGUI extends JFrame {
                 });
             }
         }
+    }
+
+
+    private void performSearch(String searchTerm, String contactType) {
+        tableModel.setRowCount(0);
+
+        BaseContact[] results = null;
+        if (searchTerm.isEmpty()) {
+            results = crmSystem.getContactManager().getAllContacts().toArray(new BaseContact[0]);
+        } else {
+            results = crmSystem.getContactManager().searchByName(searchTerm);
+            if (results.length == 0)
+                results = crmSystem.getContactManager().searchByEmail(searchTerm);
+        }
+
+        fillContacts(contactType, results);
     }
 
     private void showAddContactDialog() {
