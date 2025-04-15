@@ -48,7 +48,7 @@ public class CRMGUI extends JFrame {
         topPanel.add(contactTypeCombo);
         topPanel.add(searchButton);
 
-        String[] columnNames = {"Type", "Firstname", "Lastname", "Email", "Contact Method", "Last Contacted"};
+        String[] columnNames = {"Type", "Firstname", "Lastname", "Email", "Contact", "Last Contacted"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -137,9 +137,10 @@ public class CRMGUI extends JFrame {
             results = crmSystem.getContactManager().getAllContacts().toArray(new BaseContact[0]);
         } else {
             results = crmSystem.getContactManager().searchByName(searchTerm);
+            if (results.length == 0) {
+                results = crmSystem.getContactManager().searchByEmail(searchTerm);
+            }
         }
-
-        // TODO: performing search based on email, name, or before given date
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         for (BaseContact contact : results) {
