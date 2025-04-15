@@ -80,7 +80,7 @@ public class CRMGUI extends JFrame {
         topPanel.add(endDateLabel);
         topPanel.add(endDateField);
 
-        String[] columnNames = {"Type", "Firstname", "Lastname", "Email", "Contact Method", "Last Contacted"};
+        String[] columnNames = {"Type", "Firstname", "Lastname", "Email", "Contact", "Last Contacted"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
