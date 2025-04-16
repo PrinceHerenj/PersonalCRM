@@ -1,5 +1,6 @@
 package org.princeh;
 
+import org.princeh.impl.components.ContactDetailsCard;
 import org.princeh.models.BaseContact;
 import org.princeh.models.MongoBusinessContact;
 import org.princeh.models.MongoPersonalContact;
@@ -9,6 +10,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -114,7 +117,35 @@ public class CRMGUI extends JFrame {
         setVisible(true);
     }
 
+    private void showContactDetails(int selectedRow) {
+        String type = (String) tableModel.getValueAt(selectedRow, 0);
+        String firstName = (String) tableModel.getValueAt(selectedRow, 1);
+        String lastName = (String) tableModel.getValueAt(selectedRow, 2);
+        String email = (String) tableModel.getValueAt(selectedRow, 3);
+
+        List<BaseContact> contacts = crmSystem.getContactManager().getAllContacts();
+        for (BaseContact contact : contacts) {
+            if (contact.getFirstName().equals(firstName) && contact.getLastName().equals(lastName) && contact.getEmail().equals(email)) {
+                ContactDetailsCard detailsCard = new ContactDetailsCard(this, contact);
+                detailsCard.setVisible(true);
+                return;
+            }
+        }
+    }
+
     private void setupEventHandlers() {
+        contactTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    int selectedRow = contactTable.getSelectedRow();
+                    if (selectedRow != -1) {
+                        showContactDetails(selectedRow);
+                    }
+                }
+            }
+        });
+
         searchButton.addActionListener(_ -> {
             String searchTerm = searchField.getText().trim();
             String contactType = (String) contactTypeCombo.getSelectedItem();
