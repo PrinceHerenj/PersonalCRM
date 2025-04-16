@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +22,7 @@ public class CRMGUI extends JFrame {
     private final JButton addButton, searchButton, updateButton, deleteButton;
     private final JComboBox<String> contactTypeCombo, searchTypeCombo;
     private final JLabel startDateLabel =  new JLabel("Start Date:"), endDateLabel = new JLabel("End Date:");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     private static final String MONGODB_CONNECTION_STRING =
             "mongodb+srv://princeherenj:Sh353478@cluster0.7xs6q3p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -120,9 +122,22 @@ public class CRMGUI extends JFrame {
             if (contactMethod != null && contactMethod.equals("Name/Email"))
                 performSearch(searchTerm, contactType);
             else {
-                long startDate = Long.parseLong(startDateField.getText().trim());
-                long endDate = Long.parseLong(endDateField.getText().trim());
-                performSearch(searchTerm, contactType, startDate, endDate);
+                String t1 = startDateField.getText().trim();
+                String t2 = endDateField.getText().trim();
+                if (t1.isEmpty())
+                    System.out.println("Could not parse start date");
+                else if (t2.isEmpty()) System.out.println("Could not parse end date");
+                else {
+                    long startDate = 0, endDate = 0;
+                    try {
+                        startDate = dateFormat.parse(t1).getTime();
+                        endDate = dateFormat.parse(t2).getTime();
+
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                    performSearch(searchTerm, contactType, startDate, endDate);
+                }
             }
         });
 
@@ -155,7 +170,6 @@ public class CRMGUI extends JFrame {
 
         List<BaseContact> contacts = crmSystem.getContactManager().getAllContacts();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         for (BaseContact contact : contacts) {
             tableModel.addRow(new Object[]{
                     contact.getContactType(),
@@ -171,16 +185,11 @@ public class CRMGUI extends JFrame {
         tableModel.setRowCount(0);
 
         BaseContact[] results = null;
-        if (searchTerm.isEmpty()) results = crmSystem.getContactManager().getAllContacts().toArray(new BaseContact[0]);
-        else  {
-            results = crmSystem.getContactManager().searchByDateRange(startDate, endDate);
-        }
-
+        results = crmSystem.getContactManager().searchByDateRange(startDate, endDate);
         fillContacts(contactType, results);
     }
 
     private void fillContacts(String contactType, BaseContact[] results) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         assert results != null;
         for (BaseContact contact : results) {
             if (contactType.equals("All") || contact.getContactType().equals(contactType)) {

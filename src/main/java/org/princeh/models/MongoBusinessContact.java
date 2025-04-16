@@ -23,7 +23,7 @@ public class MongoBusinessContact extends MongoBaseContact {
 
     @Override
     public String getContactMethod() {
-        return "Work" + workPhone;
+        return "Work: " + workPhone;
     }
 
     @Override
