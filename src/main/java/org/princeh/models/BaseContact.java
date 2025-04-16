@@ -28,9 +28,9 @@ public abstract class BaseContact implements Comparable<BaseContact> {
     public abstract String getContactMethod();
     public abstract String getContactType();
 
-    public String getFormattedLastContactDate() {
-        return new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(this.lastContactedDate));
-    }
+//    public String getFormattedLastContactDate() {
+//        return new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(this.lastContactedDate));
+//    }
 
     @Override
     public int compareTo(BaseContact other) {

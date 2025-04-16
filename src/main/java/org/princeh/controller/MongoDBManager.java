@@ -10,8 +10,8 @@ import com.mongodb.client.MongoDatabase;
 
 public class MongoDBManager {
     private static MongoDBManager mongoDBManager;
-    private MongoClient mongoClient;
-    private MongoDatabase mongoDatabase;
+    private final MongoClient mongoClient;
+    private final MongoDatabase mongoDatabase;
 
     private static final String DB_NAME = "personal_crm";
 

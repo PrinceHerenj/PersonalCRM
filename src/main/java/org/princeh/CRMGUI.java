@@ -381,7 +381,6 @@ public class CRMGUI extends JFrame {
     private void deleteSelectedContact(int selectedRow) {
         String firstName = (String) tableModel.getValueAt(selectedRow, 1);
         String lastName = (String) tableModel.getValueAt(selectedRow, 2);
-        String email = (String) tableModel.getValueAt(selectedRow, 3);
 
         int result = JOptionPane.showConfirmDialog(
                 this, "Are you sure you want to delete " + firstName + " " + lastName + "?",

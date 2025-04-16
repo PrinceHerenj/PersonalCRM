@@ -152,14 +152,12 @@ public class MongoContactDAO implements ContactDAO {
                 doc.append("_id", new ObjectId(id));
         }
 
-        if (contact instanceof MongoPersonalContact) {
-            MongoPersonalContact personalContact = (MongoPersonalContact) contact;
+        if (contact instanceof MongoPersonalContact personalContact) {
             doc.append("type", "Personal")
                     .append("phoneNumber", personalContact.getPhoneNumber())
                     .append("address", personalContact.getAddress())
                     .append("birthday", personalContact.getBirthday());
-        } else if (contact instanceof MongoBusinessContact) {
-            MongoBusinessContact businessContact = (MongoBusinessContact) contact;
+        } else if (contact instanceof MongoBusinessContact businessContact) {
             doc.append("type", "Business")
                     .append("companyName", businessContact.getCompanyName())
                     .append("jobTitle", businessContact.getJobTitle())
@@ -204,9 +202,7 @@ public class MongoContactDAO implements ContactDAO {
         }
 
         if (contact != null) {
-            if (contact instanceof MongoBaseContact) {
-                ((MongoBaseContact) contact).setLastContactedDate(lastContactedDate);
-            }
+            ((MongoBaseContact) contact).setLastContactedDate(lastContactedDate);
         }
 
         return contact;
