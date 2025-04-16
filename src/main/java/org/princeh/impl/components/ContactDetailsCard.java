@@ -10,8 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ContactDetailsCard extends JDialog {
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
     public ContactDetailsCard(JFrame parent, BaseContact contact) {
         super(parent, "Contact Details", true);
 
@@ -39,13 +37,13 @@ public class ContactDetailsCard extends JDialog {
 
         addField(basicInfoPanel, "Email:", contact.getEmail());
         addField(basicInfoPanel, "Contact Method:", contact.getContactMethod());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         addField(basicInfoPanel, "Last Contacted:", dateFormat.format(new Date(contact.getLastContactedDate())));
 
         contentPanel.add(basicInfoPanel);
         contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        if (contact instanceof MongoPersonalContact) {
-            MongoPersonalContact personalContact = (MongoPersonalContact) contact;
+        if (contact instanceof MongoPersonalContact personalContact) {
             JPanel personalPanel = new JPanel(new GridLayout(0, 2, 5, 8));
             personalPanel.setBorder(BorderFactory.createTitledBorder("Personal Info"));
 
@@ -53,8 +51,7 @@ public class ContactDetailsCard extends JDialog {
             addField(personalPanel, "Address:", personalContact.getAddress());
 
             contentPanel.add(personalPanel);
-        } else if (contact instanceof MongoBusinessContact) {
-            MongoBusinessContact businessContact = (MongoBusinessContact) contact;
+        } else if (contact instanceof MongoBusinessContact businessContact) {
             JPanel businessPanel = new JPanel(new GridLayout(0, 2, 5, 8));
             businessPanel.setBorder(BorderFactory.createTitledBorder("Business Info"));
 
@@ -66,7 +63,7 @@ public class ContactDetailsCard extends JDialog {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(e -> dispose());
+        closeButton.addActionListener(_ -> dispose());
         buttonPanel.add(closeButton);
 
         contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));

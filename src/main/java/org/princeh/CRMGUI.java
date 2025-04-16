@@ -9,7 +9,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.ParseException;
@@ -60,18 +59,15 @@ public class CRMGUI extends JFrame {
         startDateLabel.setVisible(false);
         endDateLabel.setVisible(false);
 
-        searchTypeCombo.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    boolean isDateRange = "Date-Range".equals(e.getItem());
-                    startDateLabel.setVisible(isDateRange);
-                    startDateField.setVisible(isDateRange);
-                    endDateLabel.setVisible(isDateRange);
-                    endDateField.setVisible(isDateRange);
-                    topPanel.revalidate();
-                    topPanel.repaint();
-                }
+        searchTypeCombo.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                boolean isDateRange = "Date-Range".equals(e.getItem());
+                startDateLabel.setVisible(isDateRange);
+                startDateField.setVisible(isDateRange);
+                endDateLabel.setVisible(isDateRange);
+                endDateField.setVisible(isDateRange);
+                topPanel.revalidate();
+                topPanel.repaint();
             }
         });
 
@@ -118,7 +114,6 @@ public class CRMGUI extends JFrame {
     }
 
     private void showContactDetails(int selectedRow) {
-        String type = (String) tableModel.getValueAt(selectedRow, 0);
         String firstName = (String) tableModel.getValueAt(selectedRow, 1);
         String lastName = (String) tableModel.getValueAt(selectedRow, 2);
         String email = (String) tableModel.getValueAt(selectedRow, 3);
@@ -157,9 +152,19 @@ public class CRMGUI extends JFrame {
                 String t2 = endDateField.getText().trim();
                 if (t1.isEmpty())
                     System.out.println("Could not parse start date");
-                else if (t2.isEmpty()) System.out.println("Could not parse end date");
+                else if (t2.isEmpty()) {
+                    System.out.println("Could not parse end date");
+                    long startDate;
+                    try {
+                        startDate = dateFormat.parse(t1).getTime();
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                    long endDate = System.currentTimeMillis();
+                    performSearch(searchTerm, contactType, startDate, endDate);
+                }
                 else {
-                    long startDate = 0, endDate = 0;
+                    long startDate, endDate;
                     try {
                         startDate = dateFormat.parse(t1).getTime();
                         endDate = dateFormat.parse(t2).getTime();
@@ -215,7 +220,7 @@ public class CRMGUI extends JFrame {
     private void performSearch(String searchTerm, String contactType, long startDate, long endDate) {
         tableModel.setRowCount(0);
 
-        BaseContact[] results = null;
+        BaseContact[] results;
         results = crmSystem.getContactManager().searchByDateRange(startDate, endDate);
         fillContacts(contactType, results);
     }
@@ -240,7 +245,7 @@ public class CRMGUI extends JFrame {
     private void performSearch(String searchTerm, String contactType) {
         tableModel.setRowCount(0);
 
-        BaseContact[] results = null;
+        BaseContact[] results;
         if (searchTerm.isEmpty()) {
             results = crmSystem.getContactManager().getAllContacts().toArray(new BaseContact[0]);
         } else {
@@ -306,11 +311,11 @@ public class CRMGUI extends JFrame {
             cl.show(cardPanel, (String) typeCombo.getSelectedItem());
         });
 
-        JPanel buttomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton saveButton = new JButton("Save");
         JButton cancelButton = new JButton("Cancel");
-        buttomPanel.add(saveButton);
-        buttomPanel.add(cancelButton);
+        bottomPanel.add(saveButton);
+        bottomPanel.add(cancelButton);
 
         saveButton.addActionListener(_ -> {
             String type = (String) typeCombo.getSelectedItem();
@@ -348,14 +353,13 @@ public class CRMGUI extends JFrame {
 
         dialog.add(formPanel, BorderLayout.NORTH);
         dialog.add(cardPanel, BorderLayout.CENTER);
-        dialog.add(buttomPanel, BorderLayout.SOUTH);
+        dialog.add(bottomPanel, BorderLayout.SOUTH);
         dialog.pack();
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
 
     private void updateSelectedContact(int selectedRow) {
-        String type = (String) tableModel.getValueAt(selectedRow, 0);
         String firstName = (String) tableModel.getValueAt(selectedRow, 1);
         String lastName = (String) tableModel.getValueAt(selectedRow, 2);
         String email = (String) tableModel.getValueAt(selectedRow, 3);
@@ -375,7 +379,6 @@ public class CRMGUI extends JFrame {
     }
 
     private void deleteSelectedContact(int selectedRow) {
-        String type = (String) tableModel.getValueAt(selectedRow, 0);
         String firstName = (String) tableModel.getValueAt(selectedRow, 1);
         String lastName = (String) tableModel.getValueAt(selectedRow, 2);
         String email = (String) tableModel.getValueAt(selectedRow, 3);
@@ -395,7 +398,7 @@ public class CRMGUI extends JFrame {
                     if (removed) {
                         refreshTableData();
                         JOptionPane.showMessageDialog(this,
-                                "Contact deleted succesfully",
+                                "Contact deleted successfully",
                                 "Contact Deleted", JOptionPane.INFORMATION_MESSAGE);
                     }
                     return;
